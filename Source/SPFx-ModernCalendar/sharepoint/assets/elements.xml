@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Elements xmlns="http://schemas.microsoft.com/sharepoint/">
+    <ListInstance 
+            FeatureId="00bfea71-ec85-4903-972d-ebe475780106"
+            Title="Calendar" 
+            Description="Calendar"
+            TemplateType="106"
+            Url="Lists/Calendar">
+    </ListInstance>
+</Elements>
