@@ -19,7 +19,7 @@
     "group": { "default": "Other" },
     "title": { "default": "Modern Calendar" },
     "description": { "default": "This webpart will show the Events in calendar." },
-    "officeFabricIconFontName": "Page",
+    "officeFabricIconFontName": "CalendarSettings",
     "properties": {
       "WebPartTitle": "Modern Calendar",
       "EventBGColor": "lightblue",
