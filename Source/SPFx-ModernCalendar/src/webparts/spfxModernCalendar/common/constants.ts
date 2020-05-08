@@ -1,2 +1,10 @@
 export const defaultSelectKey = "select";
 export const defaultSelectText = "Select";
+export const weekDays = ["su", "mo", "tu", "we", "th", "fr", "sa"];
+export const sunday = "su";
+export const monday = "mo";
+export const tuesday = "tu";
+export const wednesday = "we";
+export const thrusday = "th";
+export const friday = "fr";
+export const saturday = "sa";

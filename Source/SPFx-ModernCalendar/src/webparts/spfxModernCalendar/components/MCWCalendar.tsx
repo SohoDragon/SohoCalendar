@@ -38,7 +38,6 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
     }
 
     private eventStyleGetter = (event, start, end, isSelected): any => {
-        console.log(event);
         var style = {
             backgroundColor: this.props.EventBGColor_compo,
             color: this.props.EventTitleColor_compo,
@@ -50,23 +49,44 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
     }
 
     public render(): React.ReactElement<IMCWCalendarProps> {
-
         return (
             <div>
                 <div className={this.state.showDialog == true ? styles.model : styles.hide}>
                     <div className={styles.spfxModernCalendar}>
-                        <div className={styles.container}>
-                            <div className={styles.row}>
-                                <div className={styles.column}>
-                                    <div><span className={styles.popupHeader}>Title: </span><span>{this.state.title}</span></div>
-                                    <div><span className={styles.popupHeader}>Start Date: </span><span>{(new Date(this.state.startDate)).toLocaleString()}</span></div>
-                                    <div><span className={styles.popupHeader}>End Date: </span><span>{(new Date(this.state.endDate)).toLocaleString()}</span></div>
-                                    <div><span className={styles.popupHeader}>Description: </span><span dangerouslySetInnerHTML={{ __html: this.state.description }}></span></div>
+                        <span style={
+                            {
+                                background: "radial-gradient(" + this.props.EventBGColor_compo + ", transparent)",
+                                color: this.props.EventTitleColor_compo
+                            }
+                        } className={styles.popupHeader}>{this.state.title}</span>
+
+                        <div className={styles.row}>
+                            <div className={styles.column}>
+                                <div className={styles.eventTimeStyle}>
                                     <div>
-                                        <a onClick={this._CloseModal} className={styles.button}>
-                                            <span className={styles.label}>Close</span>
-                                        </a>
+                                        <span className={styles.popupContent}>Event Time</span>
                                     </div>
+                                    <div>
+                                        <span>{(new Date(this.state.startDate)).toLocaleString()} - {(new Date(this.state.endDate)).toLocaleString()}</span>
+                                    </div>
+                                </div>
+                                <div className={styles.eventTimeStyle}>
+                                    <div>
+                                        <span className={styles.popupContent}>Event Description</span>
+                                    </div>
+                                    <div>
+                                        <span dangerouslySetInnerHTML={{ __html: this.state.description }}></span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <a style={
+                                        {
+                                            background: this.props.EventBGColor_compo,
+                                            color: this.props.EventTitleColor_compo
+                                        }
+                                    } onClick={this._CloseModal} className={styles.button}>
+                                        <span className={styles.label}>Close</span>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -81,7 +101,7 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
                     style={{ height: 500 }}
                     popup={true}
                     eventPropGetter={(this.eventStyleGetter)}
-                    onDoubleClickEvent={(events) => {
+                    onSelectEvent={(events) => {
                         this._OpenModal(events);
                     }
                     }

@@ -4,7 +4,8 @@ import { Version } from '@microsoft/sp-core-library';
 import {
   BaseClientSideWebPart,
   IPropertyPaneConfiguration,
-  PropertyPaneTextField
+  PropertyPaneTextField,
+  PropertyPaneToggle
 } from '@microsoft/sp-webpart-base';
 import * as strings from 'SpfxModernCalendarWebPartStrings';
 import MCWCalendar from './components/MCWCalendar';
@@ -38,9 +39,10 @@ export default class SpfxModernCalendarWebPart extends BaseClientSideWebPart<ISp
       this.context
     );
 
-    this.Events = await this.SPOperations.loadEvents(this.properties.ListTitle, this.properties.EventTitleField,
+    this.Events = await this.SPOperations.LoadEvents(this.properties.ListTitle, this.properties.EventTitleField,
       this.properties.StartDateField, this.properties.EndDateField, this.properties.EventDescriptionField,
-      this.properties.AllDaysEventField);
+      this.properties.AllDaysEventField, this.properties.ShowRecurrenceEventsField);
+
   }
 
   public render(): void {
@@ -57,6 +59,7 @@ export default class SpfxModernCalendarWebPart extends BaseClientSideWebPart<ISp
         EventTitleField_compo: this.properties.EventTitleField,
         EventDescriptionField_compo: this.properties.EventDescriptionField,
         AllDaysEventField_combo: this.properties.AllDaysEventField,
+        ShowRecurrenceEventsField_combo: this.properties.ShowRecurrenceEventsField,
         Events: this.Events
       }
     );
@@ -76,7 +79,7 @@ export default class SpfxModernCalendarWebPart extends BaseClientSideWebPart<ISp
 
     const wp: SpfxModernCalendarWebPart = this;
 
-    return this.SPOperations.loadFields(fieldType, wp.properties.ListTitle);
+    return this.SPOperations.LoadFields(fieldType, wp.properties.ListTitle);
   }
 
   private async onListFieldChange(propertyPath: string, newValue: any): Promise<void> {
@@ -86,16 +89,28 @@ export default class SpfxModernCalendarWebPart extends BaseClientSideWebPart<ISp
 
     this.Events = [];
 
-    this.Events = await this.SPOperations.loadEvents(this.properties.ListTitle, this.properties.EventTitleField,
+    this.Events = await this.SPOperations.LoadEvents(this.properties.ListTitle, this.properties.EventTitleField,
       this.properties.StartDateField, this.properties.EndDateField, this.properties.EventDescriptionField,
-      this.properties.AllDaysEventField);
+      this.properties.AllDaysEventField, this.properties.ShowRecurrenceEventsField);
 
     // refresh web part
-    this.render();    
+    this.render();
   }
 
   private async onListChange(propertyPath: string, newValue: any): Promise<void> {
     const oldValue: any = get(this.properties, propertyPath);
+
+    let splitedNewValue = newValue.split(";#");
+
+    if (splitedNewValue.length > 1 && splitedNewValue[1] === "106") {
+      update(this.properties, 'DisableShowRecurrenceField', (): boolean => { return false; });
+      update(this.properties, 'ShowRecurrenceEventsField', (): boolean => { return true; });
+    }
+    else {
+      update(this.properties, 'DisableShowRecurrenceField', (): boolean => { return true; });
+      update(this.properties, 'ShowRecurrenceEventsField', (): boolean => { return false; });
+    }
+
     // store new value in web part properties
     update(this.properties, propertyPath, (): any => { return newValue; });
     // reset selected item
@@ -110,12 +125,12 @@ export default class SpfxModernCalendarWebPart extends BaseClientSideWebPart<ISp
     update(this.properties, 'EndDateField', (): any => { return this.properties.EndDateField; });
     update(this.properties, 'EventTitleField', (): any => { return this.properties.EventTitleField; });
     update(this.properties, 'EventDescriptionField', (): any => { return this.properties.EventDescriptionField; });
-    update(this.properties, 'AllDaysEventField', ():any => {return this.properties.AllDaysEventField; });
+    update(this.properties, 'AllDaysEventField', (): any => { return this.properties.AllDaysEventField; });    
     this.Events = [];
 
-    this.Events = await this.SPOperations.loadEvents(this.properties.ListTitle, this.properties.EventTitleField,
+    this.Events = await this.SPOperations.LoadEvents(this.properties.ListTitle, this.properties.EventTitleField,
       this.properties.StartDateField, this.properties.EndDateField, this.properties.EventDescriptionField,
-      this.properties.AllDaysEventField);
+      this.properties.AllDaysEventField, this.properties.ShowRecurrenceEventsField);
 
     // refresh web part
     this.render();
@@ -132,7 +147,7 @@ export default class SpfxModernCalendarWebPart extends BaseClientSideWebPart<ISp
     this.EventTitleDropDown.properties.disabled = false;
     this.EventDescriptionDropDown.properties.disabled = false;
     this.AllDaysEventDropDown.properties.disabled = false;
-    
+
     // load items and re-render items dropdown
     this.StartDateDropDown.render();
     this.EndDateDropDown.render();
@@ -143,10 +158,23 @@ export default class SpfxModernCalendarWebPart extends BaseClientSideWebPart<ISp
     this.context.propertyPane.refresh();
   }
 
+  private async LoadEvents(): Promise<void> {
+    this.Events = [];
+
+    this.Events = await this.SPOperations.LoadEvents(this.properties.ListTitle, this.properties.EventTitleField,
+      this.properties.StartDateField, this.properties.EndDateField, this.properties.EventDescriptionField,
+      this.properties.AllDaysEventField, this.properties.ShowRecurrenceEventsField);
+
+    this.render();
+  }
+
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
+
+    this.LoadEvents();
+
     this.ListDropDown = new PropertyPaneAsyncDropdown('ListTitle', {
       label: strings.ListTitleLabel,
-      loadOptions: this.SPOperations.loadLists.bind(this),
+      loadOptions: this.SPOperations.LoadLists.bind(this),
       onPropertyChange: this.onListChange.bind(this),
       selectedKey: this.properties.ListTitle
     });
@@ -248,7 +276,12 @@ export default class SpfxModernCalendarWebPart extends BaseClientSideWebPart<ISp
                 this.EndDateDropDown,
                 this.EventTitleDropDown,
                 this.EventDescriptionDropDown,
-                this.AllDaysEventDropDown
+                this.AllDaysEventDropDown,
+                PropertyPaneToggle('ShowRecurrenceEventsField', {
+                  label: strings.ShowRecurrenceEventsFieldLabel,
+                  checked: this.properties.ShowRecurrenceEventsField,
+                  disabled: this.properties.DisableShowRecurrenceField
+                })
               ]
             }
           ]

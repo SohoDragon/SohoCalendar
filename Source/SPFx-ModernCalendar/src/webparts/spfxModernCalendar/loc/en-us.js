@@ -11,6 +11,7 @@ define([], function() {
     "EndDateFieldLabel": "End Date Field",
     "EventTitleFieldLabel": "Event Title Field",
     "EventDescriptionFieldLabel": "Event Description Field",
-    "AllDaysEventFieldLabel": "All Day Event Field"
+    "AllDaysEventFieldLabel": "All Day Event Field",
+    "ShowRecurrenceEventsFieldLabel": "Show Recurrence Events"
   }
 });

@@ -11,7 +11,6 @@
     z-index: 9999;
     width: 100%;
     height: 100%;
-    padding-top: 100px;
     background-color: black;
     background-color: rgba(0, 0, 0, 0.4);
     -webkit-transition: 0.5s;
@@ -19,22 +18,27 @@
     transition: all 0.3s linear;
     
     .spfxModernCalendar {
-        position: fixed;
         z-index: 100;
-        margin-left: 33%;
-        width: 400px;
         background-color: #fefefe;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-right: -50%;
+        transform: translate(-50%, -50%);
 
-        .container {
-            max-width: 700px;
-            margin: 0px auto;
-            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 25px 50px 0 rgba(0, 0, 0, 0.1);
+        .popupHeader{
+            width: 100%;
+            float: left;
+            text-align: center;
+            padding: 12px 0px;
+            font-weight: bolder;
+            margin-bottom: 10px;
         }
   
         .row {
             @include ms-Grid-row;
             background-color: #ffffff;
-            padding: 20px 0px;
+            margin: 0px!important;
         }
   
         .column {
@@ -43,6 +47,8 @@
             @include ms-xl8;
             @include ms-xlPush2;
             @include ms-lgPush1;
+            width: 100%!important;
+            left:0!important;
         }
   
         .title {
@@ -60,10 +66,17 @@
             @include ms-fontColor-white;
         }
 
-        .popupHeader{
+        .eventTimeStyle{
+            text-align: center;
+            border: 1px solid;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .popupContent{
             font-weight: bold;
             width: 100px;
-            float: left;
         }
   
         .button {
@@ -73,9 +86,7 @@
         
             // Primary Button
             min-width: 80px;
-            background-color: $ms-color-themePrimary;
             border-color: $ms-color-themePrimary;
-            color: $ms-color-white;
         
             // Basic Button
             outline: transparent;
@@ -91,7 +102,8 @@
             padding: 0 16px;
 
             margin-top: 20px;
-            margin-left: 42%;
+            left: 50%;
+            transform: translate(-50%, -50%);
   
             .label {
                 font-weight: $ms-font-weight-semibold;

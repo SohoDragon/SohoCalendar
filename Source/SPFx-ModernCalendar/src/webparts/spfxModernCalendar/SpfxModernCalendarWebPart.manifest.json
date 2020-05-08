@@ -24,12 +24,14 @@
       "WebPartTitle": "Modern Calendar",
       "EventBGColor": "lightblue",
       "EventTitleColor": "black",
-      "ListTitle": "Calendar",
+      "ListTitle": "Calendar;#106",
       "StartDateField": "EventDate",
       "EndDateField": "EndDate",
       "EventTitleField": "Title",
       "EventDescriptionField": "Description",
-      "AllDaysEventField": "fAllDayEvent"
+      "AllDaysEventField": "fAllDayEvent",
+      "ShowRecurrenceEventsField": true,
+      "DisableShowRecurrenceField": false
     }
   }]
 }

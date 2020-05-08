@@ -12,5 +12,6 @@ export interface IMCWCalendarProps {
   EventTitleField_compo: string;
   EventDescriptionField_compo: string;
   AllDaysEventField_combo: string;
+  ShowRecurrenceEventsField_combo: boolean;
   Events: ICalendarEvents[];
 }
