@@ -3,8 +3,8 @@ import ICalendarEvents from "../models/ICalendarEvents";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 import { IDropdownOption } from 'office-ui-fabric-react/lib/components/Dropdown';
 import { defaultSelectKey, defaultSelectText, weekDays, sunday, monday, tuesday, wednesday, thrusday, friday, saturday } from '../common/constants';
-import "@pnp/polyfill-ie11";
-import { sp } from "@pnp/sp/presets/all";
+
+import pnp from "sp-pnp-js";
 
 export default class SPOperations implements ISPOperations {
     private context: WebPartContext;
@@ -12,14 +12,14 @@ export default class SPOperations implements ISPOperations {
     constructor(context: WebPartContext) {
         this.context = context;
 
-        sp.setup({
+        pnp.setup({
             spfxContext: this.context
         });
     }
 
     public LoadLists(): Promise<IDropdownOption[]> {
         return new Promise<IDropdownOption[]>((resolve: (options: IDropdownOption[]) => void, reject: (error: any) => void) => {
-            sp.web.lists.filter('Hidden eq false').get().then((data) => {
+            pnp.sp.web.lists.filter('Hidden eq false').get().then((data) => {
                 let listArr = [];
 
                 listArr.push({
@@ -59,7 +59,7 @@ export default class SPOperations implements ISPOperations {
                 filter = "Hidden eq false and ReadOnlyField eq false and (TypeAsString eq '" + fieldType + "' or TypeAsString eq 'Boolean')";
             }
 
-            sp.web.lists.getByTitle(listTitle).fields.select('Title, InternalName, TypeAsString').filter(filter).get().then((data) => {
+            pnp.sp.web.lists.getByTitle(listTitle).fields.select('Title, InternalName, TypeAsString').filter(filter).get().then((data) => {
                 let listFieldArr = [];
 
                 listFieldArr.push({
@@ -233,27 +233,6 @@ export default class SPOperations implements ISPOperations {
                             startIndex++;
                         }
                     }
-
-                    //#region reapeat limit
-                    // This value not required as Calendar Web part already maintain this in the Start Date and End Date
-                    // let repeatForever = xml.querySelector('repeatForever');
-                    // let repeatInstances = xml.querySelector('repeatInstances');
-                    // let windowEnd = xml.querySelector('windowEnd');
-
-                    // let noEndDate = false;
-                    // let occurrenceCount;
-                    // let endDate;
-
-                    // if(repeatForever){
-                    //     noEndDate = true;
-                    // }
-                    // else if(repeatInstances){
-                    //     occurrenceCount = repeatInstances.textContent;
-                    // }
-                    // else if(windowEnd){
-                    //     endDate = new Date(windowEnd.textContent);
-                    // }
-                    //#endregion
 
                     //#region Daily Events Process
                     if (daily) {
@@ -848,19 +827,38 @@ export default class SPOperations implements ISPOperations {
         });
     }
 
+    //Edit Recurring Events only works if the Start and End Datetime not updated.
+    private EditRecurringEvents(itemArr: ICalendarEvents[], editEventsArr: any, titleField: string, descField: string, startDateField: string, endDateField: string): any {
+        for (let i = 0; i < editEventsArr.length; i++) {
+            if (editEventsArr.length > 1) {
+                itemArr.filter((item, index) => {
+                    if (item["start"].toString() === new Date(editEventsArr[i][startDateField]).toString() &&
+                        item["end"].toString() === new Date(editEventsArr[i][endDateField]).toString()) {
+                        itemArr[index]["title"] = editEventsArr[i][titleField];
+                        itemArr[index]["desc"] = editEventsArr[i][descField] ? editEventsArr[i][descField] : "";
+                    }
+                });
+            }
+        }
+        return itemArr;
+    }
+
     private RemoveDeletedEvents(itemArr: ICalendarEvents[], deletedEventsArr: any): any {
-        for (let i = 0; i < deletedEventsArr.length; i++) {            
+        for (let i = 0; i < deletedEventsArr.length; i++) {
             let deletedItemTitleArr = (deletedEventsArr[i]["title"]).split("Deleted: ");
             if (deletedItemTitleArr.length > 1) {
                 itemArr.filter((item, index) => {
                     if (item["title"] === deletedItemTitleArr[1] &&
                         item["start"].toString() === deletedEventsArr[i]["start"].toString() &&
                         item["end"].toString() === deletedEventsArr[i]["end"].toString()) {
-                        delete itemArr[index];                     
+                        delete itemArr[index];
                     }
                 });
             }
         }
+        var itemArr = itemArr.filter((x) => {
+            return x !== undefined;
+        });
         return itemArr;
     }
 
@@ -869,6 +867,7 @@ export default class SPOperations implements ISPOperations {
         return new Promise<ICalendarEvents[]>((resolve: (events: ICalendarEvents[]) => void, reject: (error: any) => void) => {
             let itemArr = [];
             let removeItemArr = [];
+            let editItemArr = [];
             if (listTitle && titleField && startDateField && endDateField && descField &&
                 listTitle != defaultSelectKey && titleField != defaultSelectKey &&
                 startDateField != defaultSelectKey && endDateField != defaultSelectKey &&
@@ -881,7 +880,7 @@ export default class SPOperations implements ISPOperations {
                     selectFields = "Id, " + titleField + ", " + startDateField + ", " + endDateField + ", " + descField + ", fRecurrence, RecurrenceData";
                 }
 
-                sp.web.lists.getByTitle(listTitle).items.select(selectFields).get().then((data) => {
+                pnp.sp.web.lists.getByTitle(listTitle).items.select(selectFields).get().then((data) => {
                     Promise.all(data.map(async (item, key) => {
                         if (!item.fRecurrence) {
                             itemArr.push({
@@ -901,7 +900,7 @@ export default class SPOperations implements ISPOperations {
                                 let recurringDataArr = await this.ProcessRecurringEvents(item, titleField, startDateField, endDateField, descField, allDayEventField);
                                 itemArr = itemArr.concat(recurringDataArr);
                             }
-                            else if (recurreceData) {
+                            else if (recurreceData && (item[titleField]).indexOf("Deleted:") > -1) {
                                 //Add the remove events logic
                                 removeItemArr.push({
                                     title: item[titleField],
@@ -909,23 +908,39 @@ export default class SPOperations implements ISPOperations {
                                     end: new Date(item[endDateField]),
                                 });
                             }
+                            else if (recurreceData) {
+                                console.log("Edit Item Logic");
+                                editItemArr.push(item);
+                            }
                         }
                     })).then((_) => {
+                        //Edit Recurring Events only works if the Start and End Datetime not updated.
+                        if (editItemArr.length > 0 && itemArr.length > 0) {
+                            itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
+                        }
                         if (removeItemArr.length > 0 && itemArr.length > 0) {
-                            this.RemoveDeletedEvents(itemArr, removeItemArr);
+                            itemArr = this.RemoveDeletedEvents(itemArr, removeItemArr);
                         }
                         resolve(itemArr);
                     }).catch((err) => {
                         console.log("Load Events Loop err: " + err);
+                        //Edit Recurring Events only works if the Start and End Datetime not updated.
+                        if (editItemArr.length > 0 && itemArr.length > 0) {
+                            itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
+                        }
                         if (removeItemArr.length > 0 && itemArr.length > 0) {
-                            this.RemoveDeletedEvents(itemArr, removeItemArr);
+                            itemArr = this.RemoveDeletedEvents(itemArr, removeItemArr);
                         }
                         resolve(itemArr);
                     });
                 }).catch((err) => {
                     console.log("Load Events err: " + err);
+                    //Edit Recurring Events only works if the Start and End Datetime not updated.
+                    if (editItemArr.length > 0 && itemArr.length > 0) {
+                        itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
+                    }
                     if (removeItemArr.length > 0 && itemArr.length > 0) {
-                        this.RemoveDeletedEvents(itemArr, removeItemArr);
+                        itemArr = this.RemoveDeletedEvents(itemArr, removeItemArr);
                     }
                     resolve(itemArr);
                 });

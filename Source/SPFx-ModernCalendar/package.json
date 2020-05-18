@@ -12,26 +12,23 @@
     "test": "gulp test"
   },
   "dependencies": {
+    "@fullcalendar/daygrid": "^4.4.0",
+    "@fullcalendar/list": "^4.4.0",
+    "@fullcalendar/moment": "^4.4.0",
+    "@fullcalendar/react": "^4.4.0",
+    "@fullcalendar/timegrid": "^4.4.0",
     "@microsoft/sp-core-library": "1.9.1",
     "@microsoft/sp-dialog": "^1.10.0",
     "@microsoft/sp-lodash-subset": "1.9.1",
     "@microsoft/sp-office-ui-fabric-core": "1.9.1",
     "@microsoft/sp-webpart-base": "1.9.1",
-    "@pnp/polyfill-ie11": "^2.0.1",
-    "@pnp/sp": "^2.0.4",
+    "@pnp/polyfill-ie11": "1.0.2",
     "@pnp/spfx-property-controls": "^1.17.0",
     "@types/es6-promise": "0.0.33",
     "@types/react-bootstrap": "^1.0.1",
     "@types/webpack-env": "1.13.1",
-    "bootstrap": "^4.4.1",
     "moment": "^2.24.0",
-    "react-big-calendar": "^0.24.5",
-    "react-bootstrap": "^0.32.4",
-    "react-bootstrap-modal": "^4.2.0",
-    "react-dnd": "^5.0.0",
-    "react-dnd-html5-backend": "^3.0.2",
-    "react-draft-wysiwyg": "^1.14.5",
-    "react-xml-parser": "^1.1.6"
+    "sp-pnp-js": "^3.0.10"
   },
   "devDependencies": {
     "@microsoft/sp-build-web": "1.9.1",
