@@ -30,6 +30,7 @@
       "EventTitleField": "Title",
       "EventDescriptionField": "Description",
       "AllDaysEventField": "fAllDayEvent",
+      "DisplayFormURL": "/Lists/Calendar/DispForm.aspx",
       "ShowRecurrenceEventsField": true,
       "DisableShowRecurrenceField": false
     }

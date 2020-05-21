@@ -21,7 +21,7 @@
         z-index: 100;
         background-color: #fefefe;
         position: absolute;
-        top: 50%;
+        top: 25%;
         left: 50%;
         margin-right: -50%;
         transform: translate(-50%, -50%);
@@ -78,6 +78,19 @@
             font-weight: bold;
             width: 100px;
         }
+
+        .ViewLinkButton{
+            margin-right: 5%;
+        }
+
+        .buttonGroup{
+            margin-left: 30%;
+            width: 100%;
+        }
+
+        .onlyCancel{
+            left: 20%;
+        }
   
         .button {
             // Our button
@@ -102,7 +115,8 @@
             padding: 0 16px;
 
             margin-top: 20px;
-            left: 50%;
+            // left: 25%;
+            // margin-right: 15%;
             transform: translate(-50%, -50%);
   
             .label {

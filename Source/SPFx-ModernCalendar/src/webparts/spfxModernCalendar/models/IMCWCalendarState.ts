@@ -4,4 +4,5 @@ export interface IMCWCalendarState {
     startDate: string;
     endDate: string;
     description: string;
+    viewLink: string;
 }

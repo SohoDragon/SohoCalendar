@@ -12,6 +12,7 @@ define([], function() {
     "EventTitleFieldLabel": "Event Title Field",
     "EventDescriptionFieldLabel": "Event Description Field",
     "AllDaysEventFieldLabel": "All Day Event Field",
+    "DisplayFormURLLabel": "Display Form URL",
     "ShowRecurrenceEventsFieldLabel": "Show Recurrence Events"
   }
 });

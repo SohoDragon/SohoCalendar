@@ -15,7 +15,7 @@ import '@fullcalendar/daygrid/main.css';
 import '@fullcalendar/list/main.css';
 import '@fullcalendar/timegrid/main.css';
 
-import defaultEvents from "../data/defaultEvents";
+import classNames from 'classnames';
 
 export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCWCalendarState> {
     constructor(props: IMCWCalendarProps, state: IMCWCalendarState) {
@@ -26,19 +26,38 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
             title: "",
             startDate: "",
             endDate: "",
-            description: ""
+            description: "",
+            viewLink: ""
         };
     }
 
     private _OpenModal = (e): void => {
         e = e.event;
         let desc = e._def.extendedProps.desc;
+        let viewEventLink = "";
+
+        if (this.props.DisplayFormURL_combo) {            
+            let sourceURL = window.location.href;            
+            let webURL = this.props.context.pageContext.web.absoluteUrl;
+            let itemId = e.id;
+
+            if (this.props.DisplayFormURL_combo.indexOf(webURL) < 0) {
+                viewEventLink = webURL;
+
+                if (this.props.DisplayFormURL_combo.indexOf("/") !== 0) {
+                    viewEventLink += "/";
+                }
+            }
+
+            viewEventLink += this.props.DisplayFormURL_combo + "?ID=" + itemId + "&Source=" + sourceURL;
+        }
         this.setState({
             showDialog: true,
             title: e.title,
             startDate: e.start.toString(),
             endDate: e.end.toString(),
-            description: desc
+            description: desc,
+            viewLink: viewEventLink
         });
     }
 
@@ -88,15 +107,24 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
                                         <span dangerouslySetInnerHTML={{ __html: this.state.description }}></span>
                                     </div>
                                 </div>
-                                <div>
+                                <div className={styles.buttonGroup}>
                                     <a style={
                                         {
                                             background: this.props.EventBGColor_compo,
                                             color: this.props.EventTitleColor_compo
                                         }
-                                    } onClick={this._CloseModal} className={styles.button}>
+                                    } href={this.state.viewLink} className={this.state.viewLink ? classNames({ [styles.button]: true, [styles.ViewLinkButton]: true }) : styles.hide}>
+                                        <span className={styles.label}>View Event</span>
+                                    </a>
+                                    <a style={
+                                        {
+                                            background: this.props.EventBGColor_compo,
+                                            color: this.props.EventTitleColor_compo
+                                        }
+                                    } onClick={this._CloseModal} className={this.state.viewLink ? styles.button : classNames({ [styles.button]: true, [styles.onlyCancel]: true })}>
                                         <span className={styles.label}>Close</span>
                                     </a>
+
                                 </div>
                             </div>
                         </div>

@@ -8,6 +8,7 @@ export default interface ISpfxModernCalendarWebPartProps {
     EventTitleField: string;
     EventDescriptionField: string;
     AllDaysEventField: string;
+    DisplayFormURL: string;
     ShowRecurrenceEventsField: boolean;
     DisableShowRecurrenceField: boolean;
   }

@@ -60,6 +60,7 @@ export default class SpfxModernCalendarWebPart extends BaseClientSideWebPart<ISp
         EventTitleField_compo: this.properties.EventTitleField,
         EventDescriptionField_compo: this.properties.EventDescriptionField,
         AllDaysEventField_combo: this.properties.AllDaysEventField,
+        DisplayFormURL_combo: this.properties.DisplayFormURL,
         ShowRecurrenceEventsField_combo: this.properties.ShowRecurrenceEventsField,
         Events: this.Events
       }
@@ -111,6 +112,9 @@ export default class SpfxModernCalendarWebPart extends BaseClientSideWebPart<ISp
       update(this.properties, 'DisableShowRecurrenceField', (): boolean => { return true; });
       update(this.properties, 'ShowRecurrenceEventsField', (): boolean => { return false; });
     }
+
+    this.properties.DisplayFormURL = "";
+    update(this.properties, 'DisplayFormURL', (): any => { return this.properties.DisplayFormURL; });
 
     // store new value in web part properties
     update(this.properties, propertyPath, (): any => { return newValue; });
@@ -278,6 +282,9 @@ export default class SpfxModernCalendarWebPart extends BaseClientSideWebPart<ISp
                 this.EventTitleDropDown,
                 this.EventDescriptionDropDown,
                 this.AllDaysEventDropDown,
+                PropertyPaneTextField('DisplayFormURL', {
+                  label: strings.DisplayFormURLLabel                  
+                }),
                 PropertyPaneToggle('ShowRecurrenceEventsField', {
                   label: strings.ShowRecurrenceEventsFieldLabel,
                   checked: this.properties.ShowRecurrenceEventsField,

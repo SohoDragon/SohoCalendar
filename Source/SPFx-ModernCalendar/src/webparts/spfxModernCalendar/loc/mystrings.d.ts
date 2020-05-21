@@ -11,6 +11,7 @@ declare interface ISpfxModernCalendarWebPartStrings {
   EventTitleFieldLabel: string;
   EventDescriptionFieldLabel: string;
   AllDaysEventFieldLabel: string;
+  DisplayFormURLLabel: string;
   ShowRecurrenceEventsFieldLabel: string;
 }
 

@@ -27,6 +27,7 @@
     "@types/es6-promise": "0.0.33",
     "@types/react-bootstrap": "^1.0.1",
     "@types/webpack-env": "1.13.1",
+    "classnames": "^2.2.6",
     "moment": "^2.24.0",
     "sp-pnp-js": "^3.0.10"
   },

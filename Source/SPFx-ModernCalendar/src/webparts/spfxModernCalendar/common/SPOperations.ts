@@ -834,6 +834,7 @@ export default class SPOperations implements ISPOperations {
                 itemArr.filter((item, index) => {
                     if (item["start"].toString() === new Date(editEventsArr[i][startDateField]).toString() &&
                         item["end"].toString() === new Date(editEventsArr[i][endDateField]).toString()) {
+                        itemArr[index]["id"] = editEventsArr[i]["Id"] + ".1." + itemArr[index]["id"];
                         itemArr[index]["title"] = editEventsArr[i][titleField];
                         itemArr[index]["desc"] = editEventsArr[i][descField] ? editEventsArr[i][descField] : "";
                     }
@@ -909,7 +910,7 @@ export default class SPOperations implements ISPOperations {
                                 });
                             }
                             else if (recurreceData) {
-                                console.log("Edit Item Logic");
+                                // console.log("Edit Item Logic");
                                 editItemArr.push(item);
                             }
                         }
