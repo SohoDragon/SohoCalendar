@@ -40,7 +40,7 @@ This Webpart plot the SharePoint Calendar Events from the Sharepoint list (i.e.,
         -   All Day Event Field (i.e., This will populate the available Boolean and AllDayEvent type fields of current selected List)
         -   Display Form URL (i.e., Provide the Selected list Display Form URL, this field is usefull to setup the View Event button in the Event popup)
         -   Show Recurrence Events (i.e., This checkbox is usefull to hide/show the recurrence events)
-            Note: This field only available for the calendar type of list
+            -   Note: This field only available for the calendar type of list
 
 This package produces the following:
 
