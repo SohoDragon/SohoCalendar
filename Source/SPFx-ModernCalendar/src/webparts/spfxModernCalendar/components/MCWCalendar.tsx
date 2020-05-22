@@ -36,10 +36,10 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
         let desc = e._def.extendedProps.desc;
         let viewEventLink = "";
 
-        if (this.props.DisplayFormURL_combo) {            
-            let sourceURL = window.location.href;            
+        if (this.props.DisplayFormURL_combo) {
+            let sourceURL = window.location.href;
             let webURL = this.props.context.pageContext.web.absoluteUrl;
-            let itemId = e.id;
+            let itemId = e._def.extendedProps.recurrenceId ? e._def.extendedProps.recurrenceId : e.id;
 
             if (this.props.DisplayFormURL_combo.indexOf(webURL) < 0) {
                 viewEventLink = webURL;
@@ -137,9 +137,21 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
                         center: 'title',
                         right: 'dayGridMonth,dayGridWeek,dayGrid,listWeek,timeGrid'
                     }}
+                    views={ {
+                        dayGridMonth: {
+                          eventLimit: 4
+                        },
+                        dayGridWeek: {
+                            eventLimit: 4
+                        },
+                        dayGrid: {
+                            eventLimit: 4
+                        }
+                      }
+                    }
                     defaultView="dayGridMonth"
                     plugins={[dayGridPlugin, listPlugin, timeGridPlugin, momentPlugin]}
-                    aspectRatio={2}
+                    aspectRatio={5}
                     eventBackgroundColor={this.props.EventBGColor_compo}
                     eventTextColor={this.props.EventTitleColor_compo}
                     height="auto"
