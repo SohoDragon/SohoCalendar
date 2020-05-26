@@ -66,13 +66,13 @@ This package produces the following:
 
 -   IE11+, Chrome, Microsoft Edge, Mozilla Firefox, Mobile
 
-## Solution
+### Solution
 
 Solution|Author(s)
 --------|---------
 spfx-moderncalendar | Navneet Bhimani (SOHO Dragon)
 
-## Version history
+### Version history
 
 Version|Date|Comments
 -------|----|--------
