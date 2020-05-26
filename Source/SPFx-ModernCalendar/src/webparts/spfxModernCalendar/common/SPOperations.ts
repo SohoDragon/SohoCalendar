@@ -131,8 +131,7 @@ export default class SPOperations implements ISPOperations {
                                 editItemArr.push(item);
                             }
                         }
-                    })).then((_) => {
-                        //Edit Recurring Events only works if two recurring event items not having the same start date time.
+                    })).then((_) => {                        
                         if (editItemArr.length > 0 && itemArr.length > 0) {
                             itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
                         }
@@ -141,8 +140,7 @@ export default class SPOperations implements ISPOperations {
                         }
                         resolve(itemArr);
                     }).catch((err) => {
-                        console.log("Load Events Loop err: " + err);
-                        //Edit Recurring Events only works if two recurring event items not having the same start date time.
+                        console.log("Load Events Loop err: " + err);                        
                         if (editItemArr.length > 0 && itemArr.length > 0) {
                             itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
                         }
@@ -152,8 +150,7 @@ export default class SPOperations implements ISPOperations {
                         resolve(itemArr);
                     });
                 }).catch((err) => {
-                    console.log("Load Events err: " + err);
-                    //Edit Recurring Events only works if two recurring event items not having the same start date time.
+                    console.log("Load Events err: " + err);                    
                     if (editItemArr.length > 0 && itemArr.length > 0) {
                         itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
                     }
@@ -921,8 +918,7 @@ export default class SPOperations implements ISPOperations {
             resolve(itemArr);
         });
     }
-
-    //Edit Recurring Events only works if two recurring event items not having the same start date time.
+    
     private EditRecurringEvents(itemArr: ICalendarEvents[], editEventsArr: any, titleField: string, descField: string, startDateField: string, endDateField: string): any {
         for (let i = 0; i < editEventsArr.length; i++) {
             if (editEventsArr.length > 1) {

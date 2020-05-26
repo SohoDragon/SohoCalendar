@@ -27,7 +27,7 @@
         transform: translate(-50%, -25%);
 
         .popupHeader{
-            width: 100%;
+            width: calc(100% - 10px);;
             float: left;
             text-align: center;
             padding: 12px 5px;

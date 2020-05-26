@@ -149,6 +149,15 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
                         }
                       }
                     }
+                    buttonText={{
+                        today: "Today",
+                        dayGridMonth: "Month",
+                        dayGridWeek: "Week",
+                        dayGrid: "Day",
+                        listWeek: "Agenda",
+                        timeGrid: "Time Grid"
+                    }
+                    }
                     defaultView="dayGridMonth"
                     plugins={[dayGridPlugin, listPlugin, timeGridPlugin, momentPlugin]}
                     aspectRatio={5}
