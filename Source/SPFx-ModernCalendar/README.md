@@ -59,7 +59,7 @@ This package produces the following:
 ### Features
 
 -   Configurable List (i.e., Can use Custom or Calendar Type List)
--   Configurable Event Background and Tile color
+-   Configurable Event Background and Title color
 -   Hide/Show Recurrence Events
 
 ### Supports

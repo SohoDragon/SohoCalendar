@@ -29,6 +29,7 @@
     "@types/webpack-env": "1.13.1",
     "classnames": "^2.2.6",
     "moment": "^2.24.0",
+    "react-portal-tooltip": "^2.4.7",
     "sp-pnp-js": "^3.0.10"
   },
   "devDependencies": {

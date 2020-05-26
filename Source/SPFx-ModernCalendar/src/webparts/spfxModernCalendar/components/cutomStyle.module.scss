@@ -24,15 +24,16 @@
         top: 25%;
         left: 50%;
         margin-right: -50%;
-        transform: translate(-50%, -50%);
+        transform: translate(-50%, -25%);
 
         .popupHeader{
             width: 100%;
             float: left;
             text-align: center;
-            padding: 12px 0px;
+            padding: 12px 5px;
             font-weight: bolder;
             margin-bottom: 10px;
+            max-width: 350px;
         }
   
         .row {
@@ -90,7 +91,7 @@
 
         .onlyCancel{
             left: 20%;
-        }
+        }        
   
         .button {
             // Our button
@@ -115,9 +116,8 @@
             padding: 0 16px;
 
             margin-top: 20px;
-            // left: 25%;
-            // margin-right: 15%;
             transform: translate(-50%, -50%);
+            border-radius: 7px;
   
             .label {
                 font-weight: $ms-font-weight-semibold;
@@ -128,6 +128,12 @@
                 vertical-align: top;
                 display: inline-block;
             }
+        }
+
+        .button:hover{
+            color: #fff!important;
+            background-color: #5a6268!important;
+            border-color: #545b62!important;
         }
     }
 }

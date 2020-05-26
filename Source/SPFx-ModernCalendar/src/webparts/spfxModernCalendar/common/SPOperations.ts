@@ -81,6 +81,94 @@ export default class SPOperations implements ISPOperations {
         });
     }
 
+    public async LoadEvents(listTitle: string, titleField: string, startDateField: string, endDateField: string, descField: string, allDayEventField: string, ShowRecurrenceEventsField: boolean): Promise<ICalendarEvents[]> {
+        listTitle = listTitle.split(";#")[0];
+        return new Promise<ICalendarEvents[]>((resolve: (events: ICalendarEvents[]) => void, reject: (error: any) => void) => {
+            let itemArr = [];
+            let removeItemArr = [];
+            let editItemArr = [];
+            if (listTitle && titleField && startDateField && endDateField && descField &&
+                listTitle != defaultSelectKey && titleField != defaultSelectKey &&
+                startDateField != defaultSelectKey && endDateField != defaultSelectKey &&
+                descField != defaultSelectKey) {
+
+                let selectFields = "";
+
+                //Recurring Events only works in the Calendar type list. 
+                if (ShowRecurrenceEventsField) {
+                    selectFields = "Id, " + titleField + ", " + startDateField + ", " + endDateField + ", " + descField + ", fRecurrence, RecurrenceData, MasterSeriesItemID, RecurrenceID";
+                }
+
+                pnp.sp.web.lists.getByTitle(listTitle).items.select(selectFields).get().then((data) => {
+                    Promise.all(data.map(async (item, key) => {
+                        if (!item.fRecurrence) {
+                            itemArr.push({
+                                id: item.Id,
+                                recurrenceId: "",
+                                title: item[titleField],
+                                start: new Date(item[startDateField]),
+                                end: new Date(item[endDateField]),
+                                desc: item[descField] ? item[descField] : "",
+                                allDay: item[allDayEventField] ? item[allDayEventField] : false
+                            });
+                        }
+                        else if (ShowRecurrenceEventsField) {
+
+                            let recurreceData = item["RecurrenceData"];
+
+                            if (recurreceData && recurreceData.indexOf("<recurrence>") > -1) {
+                                let recurringDataArr = await this.ProcessRecurringEvents(item, titleField, startDateField, endDateField, descField, allDayEventField);
+                                itemArr = itemArr.concat(recurringDataArr);
+                            }
+                            else if (recurreceData && (item[titleField]).indexOf("Deleted:") > -1) {
+                                //Add the remove events logic
+                                removeItemArr.push({
+                                    RecurrenceID: item["RecurrenceID"],
+                                    MasterSeriesItemID: item["MasterSeriesItemID"]
+                                });
+                            }
+                            else if (recurreceData) {
+                                editItemArr.push(item);
+                            }
+                        }
+                    })).then((_) => {
+                        //Edit Recurring Events only works if two recurring event items not having the same start date time.
+                        if (editItemArr.length > 0 && itemArr.length > 0) {
+                            itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
+                        }
+                        if (removeItemArr.length > 0 && itemArr.length > 0) {
+                            itemArr = this.RemoveDeletedEvents(itemArr, removeItemArr);
+                        }
+                        resolve(itemArr);
+                    }).catch((err) => {
+                        console.log("Load Events Loop err: " + err);
+                        //Edit Recurring Events only works if two recurring event items not having the same start date time.
+                        if (editItemArr.length > 0 && itemArr.length > 0) {
+                            itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
+                        }
+                        if (removeItemArr.length > 0 && itemArr.length > 0) {
+                            itemArr = this.RemoveDeletedEvents(itemArr, removeItemArr);
+                        }
+                        resolve(itemArr);
+                    });
+                }).catch((err) => {
+                    console.log("Load Events err: " + err);
+                    //Edit Recurring Events only works if two recurring event items not having the same start date time.
+                    if (editItemArr.length > 0 && itemArr.length > 0) {
+                        itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
+                    }
+                    if (removeItemArr.length > 0 && itemArr.length > 0) {
+                        itemArr = this.RemoveDeletedEvents(itemArr, removeItemArr);
+                    }
+                    resolve(itemArr);
+                });
+            }
+            else {
+                resolve(itemArr);
+            }
+        });
+    }
+
     private SetTime(date: Date, setTimeDate: Date): Date {
 
         let newTempDate = date;
@@ -839,7 +927,7 @@ export default class SPOperations implements ISPOperations {
         for (let i = 0; i < editEventsArr.length; i++) {
             if (editEventsArr.length > 1) {
                 itemArr.filter((item, index) => {
-                    if ((item["recurrenceId"].toString()).indexOf(".0." + editEventsArr[i]["RecurrenceID"].toString()) > -1) {
+                    if (item["recurrenceId"].toString() === editEventsArr[i]["MasterSeriesItemID"] + ".0." + editEventsArr[i]["RecurrenceID"].toString()) {
                         itemArr[index]["recurrenceId"] = editEventsArr[i]["Id"] + ".1." + itemArr[index]["id"];
                         itemArr[index]["title"] = editEventsArr[i][titleField];
                         itemArr[index]["desc"] = editEventsArr[i][descField] ? editEventsArr[i][descField] : "";
@@ -857,7 +945,7 @@ export default class SPOperations implements ISPOperations {
         for (let i = 0; i < deletedEventsArr.length; i++) {
             if (deletedEventsArr[i]["RecurrenceID"]) {
                 itemArr.filter((item, index) => {
-                    if ((item["recurrenceId"].toString()).indexOf(".0." + deletedEventsArr[i]["RecurrenceID"].toString()) > -1) {
+                    if (item["recurrenceId"].toString() === deletedEventsArr[i]["MasterSeriesItemID"] + ".0." + deletedEventsArr[i]["RecurrenceID"].toString()) {
                         delete itemArr[index];
                     }
                 });
@@ -867,111 +955,5 @@ export default class SPOperations implements ISPOperations {
             return x !== undefined;
         });
         return itemArr;
-    }
-
-    public async LoadEvents(listTitle: string, titleField: string, startDateField: string, endDateField: string, descField: string, allDayEventField: string, ShowRecurrenceEventsField: boolean): Promise<ICalendarEvents[]> {
-        listTitle = listTitle.split(";#")[0];
-        return new Promise<ICalendarEvents[]>((resolve: (events: ICalendarEvents[]) => void, reject: (error: any) => void) => {
-            let itemArr = [];
-            let removeItemArr = [];
-            let editItemArr = [];
-            if (listTitle && titleField && startDateField && endDateField && descField &&
-                listTitle != defaultSelectKey && titleField != defaultSelectKey &&
-                startDateField != defaultSelectKey && endDateField != defaultSelectKey &&
-                descField != defaultSelectKey) {
-
-                let selectFields = "";
-
-                //Recurring Events only works in the Calendar type list. 
-                if (ShowRecurrenceEventsField) {
-                    selectFields = "Id, " + titleField + ", " + startDateField + ", " + endDateField + ", " + descField + ", fRecurrence, RecurrenceData, RecurrenceID";
-                    // pnp.CamlQuery = {
-                    //     ViewXml: xml,
-                        
-                    //     };
-
-                    // pnp.sp.web.lists.getByTitle(listTitle).renderListDataAsStream({
-                    //     OverrideViewXml: `
-                    //         <QueryOptions>
-                    //             <ExpandRecurrence>TRUE</ExpandRecurrence>
-                    //         </QueryOptions>
-                    //     `
-                    // })
-                    // .then((data) => {
-                    //     console.log(data);
-                    // })
-                    // .catch((err) => {
-                    //     console.log(err)
-                    // });
-
-                }
-
-                pnp.sp.web.lists.getByTitle(listTitle).items.select(selectFields).get().then((data) => {
-                    Promise.all(data.map(async (item, key) => {
-                        if (!item.fRecurrence) {
-                            itemArr.push({
-                                id: item.Id,
-                                recurrenceId: "",
-                                title: item[titleField],
-                                start: new Date(item[startDateField]),
-                                end: new Date(item[endDateField]),
-                                desc: item[descField] ? item[descField] : "",
-                                allDay: item[allDayEventField] ? item[allDayEventField] : false
-                            });
-                        }
-                        else if (ShowRecurrenceEventsField) {
-
-                            let recurreceData = item["RecurrenceData"];
-
-                            if (recurreceData && recurreceData.indexOf("<recurrence>") > -1) {
-                                let recurringDataArr = await this.ProcessRecurringEvents(item, titleField, startDateField, endDateField, descField, allDayEventField);
-                                itemArr = itemArr.concat(recurringDataArr);
-                            }
-                            else if (recurreceData && (item[titleField]).indexOf("Deleted:") > -1) {
-                                //Add the remove events logic
-                                removeItemArr.push({
-                                    RecurrenceID: item["RecurrenceID"]
-                                });
-                            }
-                            else if (recurreceData) {
-                                editItemArr.push(item);
-                            }
-                        }
-                    })).then((_) => {
-                        //Edit Recurring Events only works if two recurring event items not having the same start date time.
-                        if (editItemArr.length > 0 && itemArr.length > 0) {
-                            itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
-                        }
-                        if (removeItemArr.length > 0 && itemArr.length > 0) {
-                            itemArr = this.RemoveDeletedEvents(itemArr, removeItemArr);
-                        }
-                        resolve(itemArr);
-                    }).catch((err) => {
-                        console.log("Load Events Loop err: " + err);
-                        //Edit Recurring Events only works if two recurring event items not having the same start date time.
-                        if (editItemArr.length > 0 && itemArr.length > 0) {
-                            itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
-                        }
-                        if (removeItemArr.length > 0 && itemArr.length > 0) {
-                            itemArr = this.RemoveDeletedEvents(itemArr, removeItemArr);
-                        }
-                        resolve(itemArr);
-                    });
-                }).catch((err) => {
-                    console.log("Load Events err: " + err);
-                    //Edit Recurring Events only works if two recurring event items not having the same start date time.
-                    if (editItemArr.length > 0 && itemArr.length > 0) {
-                        itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
-                    }
-                    if (removeItemArr.length > 0 && itemArr.length > 0) {
-                        itemArr = this.RemoveDeletedEvents(itemArr, removeItemArr);
-                    }
-                    resolve(itemArr);
-                });
-            }
-            else {
-                resolve(itemArr);
-            }
-        });
     }
 }

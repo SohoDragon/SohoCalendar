@@ -136,7 +136,7 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
                         left: 'prev,next, today',
                         center: 'title',
                         right: 'dayGridMonth,dayGridWeek,dayGrid,listWeek,timeGrid'
-                    }}
+                    }}                    
                     views={ {
                         dayGridMonth: {
                           eventLimit: 4
@@ -160,6 +160,9 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
                         this._OpenModal(events);
                     }
                     }
+                    eventMouseEnter={(event) => {
+                        event.el.title = event.event.title;
+                    }}
                     events={this.props.Events} />
             </div>
 
