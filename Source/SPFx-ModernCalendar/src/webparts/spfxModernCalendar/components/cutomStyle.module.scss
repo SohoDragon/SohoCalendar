@@ -118,6 +118,10 @@
             margin-top: 20px;
             transform: translate(-50%, -50%);
             border-radius: 7px;
+
+            color: #fff;
+            background-color: #343a40;
+            border-color: #343a40;
   
             .label {
                 font-weight: $ms-font-weight-semibold;
@@ -131,9 +135,9 @@
         }
 
         .button:hover{
-            color: #fff!important;
-            background-color: #5a6268!important;
-            border-color: #545b62!important;
+            color: #fff;
+            background-color: #23272b;
+            border-color: #1d2124;
         }
     }
 }

@@ -108,20 +108,10 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
                                     </div>
                                 </div>
                                 <div className={styles.buttonGroup}>
-                                    <a style={
-                                        {
-                                            background: this.props.EventBGColor_compo,
-                                            color: this.props.EventTitleColor_compo
-                                        }
-                                    } href={this.state.viewLink} className={this.state.viewLink ? classNames({ [styles.button]: true, [styles.ViewLinkButton]: true }) : styles.hide}>
+                                    <a href={this.state.viewLink} className={this.state.viewLink ? classNames({ [styles.button]: true, [styles.ViewLinkButton]: true }) : styles.hide}>
                                         <span className={styles.label}>View Event</span>
                                     </a>
-                                    <a style={
-                                        {
-                                            background: this.props.EventBGColor_compo,
-                                            color: this.props.EventTitleColor_compo
-                                        }
-                                    } onClick={this._CloseModal} className={this.state.viewLink ? styles.button : classNames({ [styles.button]: true, [styles.onlyCancel]: true })}>
+                                    <a onClick={this._CloseModal} className={this.state.viewLink ? styles.button : classNames({ [styles.button]: true, [styles.onlyCancel]: true })}>
                                         <span className={styles.label}>Close</span>
                                     </a>
 
