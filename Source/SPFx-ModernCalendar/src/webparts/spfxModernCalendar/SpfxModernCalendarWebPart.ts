@@ -242,6 +242,7 @@ export default class SpfxModernCalendarWebPart extends BaseClientSideWebPart<ISp
           displayGroupsAsAccordion: true,
           groups: [
             {
+              isCollapsed: true,
               groupName: strings.BasicGroupName,
               groupFields: [
                 PropertyPaneTextField('WebPartTitle', {

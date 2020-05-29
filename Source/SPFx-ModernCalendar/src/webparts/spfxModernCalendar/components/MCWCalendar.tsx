@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { IMCWCalendarProps } from '../models/IMCWCalendarProps';
 import { IMCWCalendarState } from "../models/IMCWCalendarState";
-import styles from "../components/cutomStyle.module.scss";
+import styles from "../components/customStyle.module.scss";
 import calendarstyles from "../components/GraphCalendar.module.scss";
 
 import FullCalendar from '@fullcalendar/react';
@@ -31,7 +31,7 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
         };
     }
 
-    private _OpenModal = (e): void => {
+    private OpenModal = (e): void => {
         e = e.event;
         let desc = e._def.extendedProps.desc;
         let viewEventLink = "";
@@ -61,7 +61,7 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
         });
     }
 
-    private _CloseModal = (): any => {
+    private CloseModal = (): any => {
         this.setState({
             showDialog: false
         });
@@ -111,7 +111,7 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
                                     <a href={this.state.viewLink} className={this.state.viewLink ? classNames({ [styles.button]: true, [styles.ViewLinkButton]: true }) : styles.hide}>
                                         <span className={styles.label}>View Event</span>
                                     </a>
-                                    <a onClick={this._CloseModal} className={this.state.viewLink ? styles.button : classNames({ [styles.button]: true, [styles.onlyCancel]: true })}>
+                                    <a onClick={this.CloseModal} className={this.state.viewLink ? styles.button : classNames({ [styles.button]: true, [styles.onlyCancel]: true })}>
                                         <span className={styles.label}>Close</span>
                                     </a>
 
@@ -156,7 +156,7 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
                     height="auto"
                     eventLimit={true}
                     eventClick={(events) => {
-                        this._OpenModal(events);
+                        this.OpenModal(events);
                     }
                     }
                     eventMouseEnter={(event) => {
