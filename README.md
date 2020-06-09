@@ -42,7 +42,7 @@ This Webpart plot the SharePoint Calendar Events from the Sharepoint list (i.e.,
         -   Show Recurrence Events (i.e., This checkbox is usefull to hide/show the recurrence events)
             -   Note: This field only available for the calendar type of list
 
-![SS1](https://github.com/SohoDragon/SohoCalendar/blob/master/Documents/spfx-moderncalendar.gif)
+![SS1](https://github.com/SohoDragon/SohoCalendar/blob/master/assets/spfx-moderncalendar.gif)
 
 This package produces the following:
 
