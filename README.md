@@ -9,7 +9,7 @@ extensions:
   contentType: samples
   technologies:
   - SharePoint Framework
-  createdDate: 5/22/2020 12:00:00 AM
+  createdDate: 6/9/2020 12:00:00 AM
 ---
 
 # Modern Calendar
@@ -76,4 +76,4 @@ spfx-moderncalendar | Navneet Bhimani (SOHO Dragon)
 
 Version|Date|Comments
 -------|----|--------
-1.0.0.0|May 22, 2020|Initial release
+1.0.0.0|Jun 09, 2020|Initial release
