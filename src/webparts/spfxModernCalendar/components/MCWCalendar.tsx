@@ -74,7 +74,7 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
                     <div className={styles.spfxModernCalendar}>
                         <span style={
                             {
-                                background: "radial-gradient(" + this.props.EventBGColor_compo + ", transparent)",
+                                background: this.props.EventBGColor_compo,
                                 color: this.props.EventTitleColor_compo
                             }
                         } className={styles.popupHeader}>{this.state.title}</span>
@@ -85,12 +85,12 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
                                     <div>
                                         <span style={
                                             {
-                                                background: "radial-gradient(" + this.props.EventBGColor_compo + ", transparent)",
+                                                background: this.props.EventBGColor_compo,
                                                 color: this.props.EventTitleColor_compo
                                             }
                                         } className={styles.popupContent}>Event Time</span>
                                     </div>
-                                    <div>
+                                    <div className={styles.timeText}>
                                         <span>{(new Date(this.state.startDate)).toLocaleString()} - {(new Date(this.state.endDate)).toLocaleString()}</span>
                                     </div>
                                 </div>
@@ -98,7 +98,7 @@ export default class MCWCalendar extends React.Component<IMCWCalendarProps, IMCW
                                     <div>
                                         <span style={
                                             {
-                                                background: "radial-gradient(" + this.props.EventBGColor_compo + ", transparent)",
+                                                background: this.props.EventBGColor_compo,
                                                 color: this.props.EventTitleColor_compo
                                             }
                                         } className={styles.popupContent}>Event Description</span>
