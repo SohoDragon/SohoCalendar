@@ -83,7 +83,7 @@ export default class SPOperations implements ISPOperations {
 
     public async LoadEvents(listTitle: string, titleField: string, startDateField: string, endDateField: string, descField: string, allDayEventField: string, ShowRecurrenceEventsField: boolean): Promise<ICalendarEvents[]> {
         listTitle = listTitle.split(";#")[0];
-        return new Promise<ICalendarEvents[]>((resolve: (events: ICalendarEvents[]) => void, reject: (error: any) => void) => {
+        return new Promise<ICalendarEvents[]>(async (resolve: (events: ICalendarEvents[]) => void, reject: (error: any) => void) => {
             let itemArr = [];
             let removeItemArr = [];
             let editItemArr = [];
@@ -99,58 +99,79 @@ export default class SPOperations implements ISPOperations {
                     selectFields = "Id, " + titleField + ", " + startDateField + ", " + endDateField + ", " + descField + ", fRecurrence, RecurrenceData, MasterSeriesItemID, RecurrenceID";
                 }
 
-                pnp.sp.web.lists.getByTitle(listTitle).items.select(selectFields).get().then((data) => {
-                    Promise.all(data.map(async (item, key) => {
-                        if (!item.fRecurrence) {
-                            itemArr.push({
-                                id: item.Id,
-                                recurrenceId: "",
-                                title: item[titleField],
-                                start: new Date(item[startDateField]),
-                                end: new Date(item[endDateField]),
-                                desc: item[descField] ? item[descField] : "",
-                                allDay: item[allDayEventField] ? item[allDayEventField] : false
+                let dataArray = [];
+                await pnp.sp.web.lists.getByTitle(listTitle).items.select(selectFields).getPaged().then(async (data) => {
+                    dataArray = dataArray.concat(data.results);
+                    while (data["nextUrl"]) {
+                        await data.getNext().then((d) => {
+                            dataArray = dataArray.concat(d.results);
+                            data = d;
+                        }).catch((err) => {
+                            reject(err);
+                        });
+                    }
+                }).catch((err) => {
+                    reject(err);
+                });
+
+                console.log(dataArray);
+
+                // pnp.sp.web.lists.getByTitle(listTitle).items.select(selectFields).get().then((data) => {
+                Promise.all(dataArray.map(async (item, key) => {
+                    if (!item.fRecurrence) {
+                        let regStartDate;
+                        let regEndDate;
+
+                        if (!item[allDayEventField]) {
+                            regStartDate = await pnp.sp.web.regionalSettings.timeZone.utcToLocalTime((new Date(item[startDateField])));
+                            regEndDate = await pnp.sp.web.regionalSettings.timeZone.utcToLocalTime((new Date(item[endDateField])));
+                        }
+                        else {
+                            let tempStartDate = new Date(item[startDateField]);
+                            let tempEndDate = new Date(item[endDateField]);
+                            regStartDate = await pnp.sp.web.regionalSettings.timeZone.utcToLocalTime((new Date(tempStartDate.setDate(tempStartDate.getDate() + 1))));
+                            regEndDate = await pnp.sp.web.regionalSettings.timeZone.utcToLocalTime((new Date(tempEndDate.setDate(tempEndDate.getDate() + 1))));
+                        }
+
+                        itemArr.push({
+                            id: item.Id,
+                            recurrenceId: "",
+                            title: item[titleField],
+                            start: regStartDate,
+                            end: regEndDate,
+                            desc: item[descField] ? item[descField] : "",
+                            allDay: item[allDayEventField] ? item[allDayEventField] : false
+                        });
+                    }
+                    else if (ShowRecurrenceEventsField) {
+
+                        let recurreceData = item["RecurrenceData"];
+
+                        if (recurreceData && recurreceData.indexOf("<recurrence>") > -1) {
+                            let recurringDataArr = await this.ProcessRecurringEvents(item, titleField, startDateField, endDateField, descField, allDayEventField);
+                            itemArr = itemArr.concat(recurringDataArr);
+                        }
+                        else if (recurreceData && (item[titleField]).indexOf("Deleted:") > -1) {
+                            //Add the remove events logic
+                            removeItemArr.push({
+                                RecurrenceID: item["RecurrenceID"],
+                                MasterSeriesItemID: item["MasterSeriesItemID"]
                             });
                         }
-                        else if (ShowRecurrenceEventsField) {
-
-                            let recurreceData = item["RecurrenceData"];
-
-                            if (recurreceData && recurreceData.indexOf("<recurrence>") > -1) {
-                                let recurringDataArr = await this.ProcessRecurringEvents(item, titleField, startDateField, endDateField, descField, allDayEventField);
-                                itemArr = itemArr.concat(recurringDataArr);
-                            }
-                            else if (recurreceData && (item[titleField]).indexOf("Deleted:") > -1) {
-                                //Add the remove events logic
-                                removeItemArr.push({
-                                    RecurrenceID: item["RecurrenceID"],
-                                    MasterSeriesItemID: item["MasterSeriesItemID"]
-                                });
-                            }
-                            else if (recurreceData) {
-                                editItemArr.push(item);
-                            }
+                        else if (recurreceData) {
+                            editItemArr.push(item);
                         }
-                    })).then((_) => {                        
-                        if (editItemArr.length > 0 && itemArr.length > 0) {
-                            itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
-                        }
-                        if (removeItemArr.length > 0 && itemArr.length > 0) {
-                            itemArr = this.RemoveDeletedEvents(itemArr, removeItemArr);
-                        }
-                        resolve(itemArr);
-                    }).catch((err) => {
-                        console.log("Load Events Loop err: " + err);                        
-                        if (editItemArr.length > 0 && itemArr.length > 0) {
-                            itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
-                        }
-                        if (removeItemArr.length > 0 && itemArr.length > 0) {
-                            itemArr = this.RemoveDeletedEvents(itemArr, removeItemArr);
-                        }
-                        resolve(itemArr);
-                    });
+                    }
+                })).then((_) => {
+                    if (editItemArr.length > 0 && itemArr.length > 0) {
+                        itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
+                    }
+                    if (removeItemArr.length > 0 && itemArr.length > 0) {
+                        itemArr = this.RemoveDeletedEvents(itemArr, removeItemArr);
+                    }
+                    resolve(itemArr);
                 }).catch((err) => {
-                    console.log("Load Events err: " + err);                    
+                    console.log("Load Events Loop err: " + err);
                     if (editItemArr.length > 0 && itemArr.length > 0) {
                         itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
                     }
@@ -159,6 +180,16 @@ export default class SPOperations implements ISPOperations {
                     }
                     resolve(itemArr);
                 });
+                // }).catch((err) => {
+                //     console.log("Load Events err: " + err);
+                //     if (editItemArr.length > 0 && itemArr.length > 0) {
+                //         itemArr = this.EditRecurringEvents(itemArr, editItemArr, titleField, descField, startDateField, endDateField);
+                //     }
+                //     if (removeItemArr.length > 0 && itemArr.length > 0) {
+                //         itemArr = this.RemoveDeletedEvents(itemArr, removeItemArr);
+                //     }
+                //     resolve(itemArr);
+                // });
             }
             else {
                 resolve(itemArr);
@@ -918,7 +949,7 @@ export default class SPOperations implements ISPOperations {
             resolve(itemArr);
         });
     }
-    
+
     private EditRecurringEvents(itemArr: ICalendarEvents[], editEventsArr: any, titleField: string, descField: string, startDateField: string, endDateField: string): any {
         for (let i = 0; i < editEventsArr.length; i++) {
             if (editEventsArr.length > 1) {
