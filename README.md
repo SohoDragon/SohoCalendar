@@ -49,12 +49,17 @@ This package produces the following:
 * lib/* - intermediate-stage commonjs build artifacts
 * dist/* - the bundled script, along with other resources
 
+### Deployment Steps
+- Create a folder inside Site Assets library or any location in site where webpart is used.
+- Give the path to the folder in write-manifests.json file in cdnBasePath.
+
 ### Build Package
 
 -   gulp clean
 -   gulp build
 -   gulp bundle --ship
 -   gulp package-solution --ship
+-   Copy all the files from temp\deploy folder to the folder created (Path mentioned in write-manifests.json file).
 
 ### Features
 
