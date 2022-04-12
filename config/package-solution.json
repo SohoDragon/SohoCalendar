@@ -3,8 +3,8 @@
   "solution": {
     "name": "SharePoint Modern Calendar",
     "id": "ce5bfc52-cbbe-414f-9d77-e2118e825483",
-    "version": "1.0.0.0",
-    "includeClientSideAssets": true,
+    "version": "1.0.0.4",
+    "includeClientSideAssets": false,
     "isDomainIsolated": false,
     "iconPath": "Images/output-onlinepngtools.png",
     "features": [{

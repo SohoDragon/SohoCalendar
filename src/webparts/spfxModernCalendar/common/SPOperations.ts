@@ -5,6 +5,7 @@ import { IDropdownOption } from 'office-ui-fabric-react/lib/components/Dropdown'
 import { defaultSelectKey, defaultSelectText, weekDays, sunday, monday, tuesday, wednesday, thrusday, friday, saturday } from '../common/constants';
 
 import pnp from "sp-pnp-js";
+import * as moment from "moment";
 
 export default class SPOperations implements ISPOperations {
     private context: WebPartContext;
@@ -96,11 +97,11 @@ export default class SPOperations implements ISPOperations {
 
                 //Recurring Events only works in the Calendar type list. 
                 if (ShowRecurrenceEventsField) {
-                    selectFields = "Id, " + titleField + ", " + startDateField + ", " + endDateField + ", " + descField + ", fRecurrence, RecurrenceData, MasterSeriesItemID, RecurrenceID";
+                    selectFields = "Id, " + titleField + ", " + startDateField + ", " + endDateField + ", " + descField + ", fRecurrence, RecurrenceData, MasterSeriesItemID, RecurrenceID, FieldValuesAsText/"+startDateField+", FieldValuesAsText/"+endDateField+"";
                 }
 
                 let dataArray = [];
-                await pnp.sp.web.lists.getByTitle(listTitle).items.select(selectFields).getPaged().then(async (data) => {
+                await pnp.sp.web.lists.getByTitle(listTitle).items.select(selectFields).expand("FieldValuesAsText").getPaged().then(async (data) => {
                     dataArray = dataArray.concat(data.results);
                     while (data["nextUrl"]) {
                         await data.getNext().then((d) => {
@@ -115,7 +116,7 @@ export default class SPOperations implements ISPOperations {
                 });
 
                 console.log(dataArray);
-
+                
                 // pnp.sp.web.lists.getByTitle(listTitle).items.select(selectFields).get().then((data) => {
                 Promise.all(dataArray.map(async (item, key) => {
                     if (!item.fRecurrence) {
@@ -123,16 +124,21 @@ export default class SPOperations implements ISPOperations {
                         let regEndDate;
 
                         if (!item[allDayEventField]) {
-                            regStartDate = await pnp.sp.web.regionalSettings.timeZone.utcToLocalTime((new Date(item[startDateField])));
-                            regEndDate = await pnp.sp.web.regionalSettings.timeZone.utcToLocalTime((new Date(item[endDateField])));
+                            //regStartDate = await pnp.sp.web.regionalSettings.timeZone.utcToLocalTime((new Date(item[startDateField])));
+                            //regEndDate = await pnp.sp.web.regionalSettings.timeZone.utcToLocalTime((new Date(item[endDateField])));
+                            //console.log(moment(item.FieldValuesAsText[startDateField]).format("YYYY-MM-DDTHH:mm:ss"), regStartDate);
+                            regStartDate = moment(new Date(item.FieldValuesAsText[startDateField])).format("YYYY-MM-DDTHH:mm:ss");
+                            regEndDate = moment(new Date(item.FieldValuesAsText[endDateField])).format("YYYY-MM-DDTHH:mm:ss");
                         }
                         else {
-                            let tempStartDate = new Date(item[startDateField]);
-                            let tempEndDate = new Date(item[endDateField]);
-                            regStartDate = await pnp.sp.web.regionalSettings.timeZone.utcToLocalTime((new Date(tempStartDate.setDate(tempStartDate.getDate() + 1))));
-                            regEndDate = await pnp.sp.web.regionalSettings.timeZone.utcToLocalTime((new Date(tempEndDate.setDate(tempEndDate.getDate() + 1))));
+                            //let tempStartDate = new Date(item[startDateField]);
+                            //let tempEndDate = new Date(item[endDateField]);
+                            //regStartDate = await pnp.sp.web.regionalSettings.timeZone.utcToLocalTime((new Date(tempStartDate.setDate(tempStartDate.getDate() + 1))));
+                            //regEndDate = await pnp.sp.web.regionalSettings.timeZone.utcToLocalTime((new Date(tempEndDate.setDate(tempEndDate.getDate() + 1))));
+                            //console.log(regStartDate, moment(item.FieldValuesAsText[startDateField]).add('days', 1).format("YYYY-MM-DDTHH:mm:ss"));
+                             regStartDate = moment(new Date(item.FieldValuesAsText[startDateField])).add(1, 'days').format("YYYY-MM-DDTHH:mm:ss");
+                             regEndDate = moment(new Date(item.FieldValuesAsText[endDateField])).add(1, 'days').format("YYYY-MM-DDTHH:mm:ss");
                         }
-
                         itemArr.push({
                             id: item.Id,
                             recurrenceId: "",
